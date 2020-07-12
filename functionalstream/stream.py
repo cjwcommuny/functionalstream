@@ -113,3 +113,11 @@ class Stream:
 
     def to_frozenset(self):
         return frozenset(self)
+
+    def to_numpy_array(self, *args, **kwargs):
+        import numpy as np
+        return np.array(self.to_list(), *args, **kwargs)
+
+    def to_tensor(self, *args, **kwargs):
+        import torch
+        return torch.tensor(self.to_list(), *args, **kwargs)
