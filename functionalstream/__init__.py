@@ -1,1 +1,1 @@
-from functionalstream.stream import *
+from functionalstream.stream import Stream
