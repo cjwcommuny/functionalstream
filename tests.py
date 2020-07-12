@@ -1,4 +1,4 @@
-from pyiterator import Stream
+from functionalstream import Stream
 import unittest
 
 class StreamTestCase(unittest.TestCase):
