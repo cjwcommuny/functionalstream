@@ -1,10 +1,16 @@
 import functools
 import operator
-from abc import ABC
 from collections import Iterable
 import itertools
 from multiprocessing import Pool
 from typing import Optional
+
+
+def star_fn(f):
+    def star_wrapper(tuple_input):
+        return f(*tuple_input)
+    return star_wrapper
+
 
 
 class Stream:
@@ -24,10 +30,12 @@ class Stream:
     def combinations_with_replacement(self, r):
         return Stream(itertools.combinations_with_replacement(self, r))
 
-    def dropwhile(self, predicate):
+    def dropwhile(self, predicate, star=False):
+        predicate = star_fn(predicate) if star else predicate
         return Stream(itertools.dropwhile(predicate, self))
 
-    def filterfalse(self, predicate):
+    def filterfalse(self, predicate, star=False):
+        predicate = star_fn(predicate) if star else predicate
         return Stream(itertools.filterfalse(predicate, self))
 
     def groupby(self, key=None):
@@ -49,7 +57,8 @@ class Stream:
         else:
             return Stream(pool.starmap(func, self, chunksize))
 
-    def takewhile(self, predicate):
+    def takewhile(self, predicate, star=False):
+        predicate = star_fn(predicate) if star else predicate
         return Stream(itertools.takewhile(predicate, self))
 
     def tee(self, n=2):
@@ -58,7 +67,8 @@ class Stream:
     def enumerate(self, start=0):
         return Stream(enumerate(self, start))
 
-    def filter(self, function):
+    def filter(self, function, star=False):
+        function = star_fn(function) if star else function
         return Stream(filter(function, self))
 
     def map(self, func, pool: Optional[Pool]=None, chunksize=None):
@@ -77,13 +87,16 @@ class Stream:
     def sum(self, start=0):
         return Stream(sum(self, start))
 
-    def reduce(self, function, initializer=None):
+    def reduce(self, function, initializer=None, star=False):
+        function = star_fn(function) if star else function
         return Stream(functools.reduce(function, self, initializer))
 
-    def imap(self, pool: Pool, func, chunksize=None):
+    def imap(self, pool: Pool, func, chunksize=None, star=False):
+        func = star_fn(func) if star else func
         return Stream(pool.imap(func, self, chunksize))
 
-    def imap_unordered(self, pool: Pool, func, chunksize=None):
+    def imap_unordered(self, pool: Pool, func, chunksize=None, star=False):
+        func = star_fn(func) if star else func
         return Stream(pool.imap_unordered(func, self, chunksize))
 
     def collect(self, function):
