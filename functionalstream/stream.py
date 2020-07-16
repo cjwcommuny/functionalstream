@@ -130,6 +130,6 @@ class Stream:
         :return:
         """
         if star:
-            self.map(function).to_list()
-        else:
             self.starmap(function).to_list()
+        else:
+            self.map(function).to_list()
