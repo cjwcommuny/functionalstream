@@ -121,3 +121,15 @@ class Stream:
     def to_tensor(self, *args, **kwargs) -> 'torch.tensor':
         import torch
         return torch.tensor(self.to_list(), *args, **kwargs)
+
+    def apply(self, function: Callable, star: bool=False) -> None:
+        """
+        used when function has side effect, e.g. print
+        :param function:
+        :param star:
+        :return:
+        """
+        if star:
+            self.map(function).to_list()
+        else:
+            self.starmap(function).to_list()
