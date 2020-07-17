@@ -1,3 +1,4 @@
+import collections
 import functools
 import operator
 from collections import Iterable
@@ -13,7 +14,7 @@ def _star_fn(f):
 
 
 
-class Stream:
+class Stream(Iterable):
     def __init__(self, iterable: Iterable):
         super().__init__()
         self.iterable = iterable
@@ -41,7 +42,7 @@ class Stream:
     def groupby(self, key=None) -> 'Stream':
         return Stream(itertools.groupby(self, key))
 
-    def islice(self, *args, **kwargs) -> 'Stream':
+    def slice(self, *args, **kwargs) -> 'Stream':
         return Stream(itertools.islice(self, *args, **kwargs))
 
     def permutations(self, r: int=None) -> 'Stream':
@@ -133,3 +134,37 @@ class Stream:
             self.starmap(function).to_list()
         else:
             self.map(function).to_list()
+
+
+    def find_first(self, predicate: Callable, star: bool=False):
+        return next(iter(self.filter(predicate, star)), None)
+
+    def skip(self, start: int) -> 'Stream':
+        return self.islice(start=start, stop=None)
+
+    def limit(self, n: int) -> 'Stream':
+        return self.islice(stop=n)
+
+    def flatten(self) -> 'Stream':
+        return Stream(itertools.chain.from_iterable(self))
+
+    def any(self) -> bool:
+        return any(self)
+
+    def all(self) -> bool:
+        return all(self)
+
+    def non_empty(self) -> bool:
+        return any(True for _ in iter(self))
+
+    def empty(self) -> bool:
+        return not self.non_empty()
+
+    def count(self) -> int:
+        return sum(1 for _ in self)
+
+    def join_as_str(self, sep: str, str_func: Callable=str, star: bool=False):
+        if star:
+            return sep.join(self.starmap(str_func))
+        else:
+            return sep.join(self.map(str_func))

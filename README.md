@@ -19,4 +19,7 @@ lst2 = Stream([(1,2), (3,4), (6,5)]).filter(lambda x, y: x < y, star=True).to_li
 
 # array = array([0., 1., 2., 3., 4., 5., 6., 7., 8., 9.])
 array = Stream(range(10)).to_numpy_array(dtype=float)
+
+# for function which has side effect
+Stream(range(10)).apply(lambda x: print(x))
 ```
