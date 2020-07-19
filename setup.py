@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="functionalstream", # Replace with your own username
-    version="0.1.6",
+    version="0.1.7",
     author="cjwcommuny",
     author_email="cjwcommuny@outlook.com",
     description="A functional interface for python iterator",
