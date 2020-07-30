@@ -8,6 +8,8 @@ pip install functionalstream
 
 ## Example
 
+### Stream
+
 ```python
 from functionalstream import Stream
 
@@ -23,3 +25,23 @@ array = Stream(range(10)).to_numpy_array(dtype=float)
 # for function which has side effect
 Stream(range(10)).apply(lambda x: print(x))
 ```
+
+### PathStream
+
+```python
+from functionalstream import PathStream
+
+video_paths = PathStream.from_path('./').filter_extension(extensions={".jpeg"})
+```
+
+
+### Pipeline
+
+```python
+from functionalstream.functions import increment
+from functionalstream import Stream
+
+# x = 3
+x = Stream([increment] * 3).pipeline(0)
+```
+

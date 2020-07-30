@@ -1,10 +1,12 @@
-import collections
 import functools
+import functools
+import itertools
 import operator
 from collections import Iterable
-import itertools
 from multiprocessing import Pool
-from typing import Optional, Callable, List
+from typing import Optional, Callable, TypeVar
+
+from functionalstream import pipeline
 
 
 def _star_fn(f):
@@ -12,6 +14,8 @@ def _star_fn(f):
         return f(*tuple_input)
     return star_wrapper
 
+T = TypeVar('T')
+Fn_T2T = Callable[[T], T]
 
 
 class Stream(Iterable):
@@ -123,7 +127,11 @@ class Stream(Iterable):
         import torch
         return torch.tensor(self.to_list(), *args, **kwargs)
 
-    def apply(self, function: Callable, star: bool=False) -> None:
+    def cat_to_tensor(self) -> 'torch.Tensor':
+        import torch
+        return torch.cat(self.to_list())
+
+    def foreach(self, function: Callable, star: bool=False) -> None:
         """
         used when function has side effect, e.g. print
         :param function:
@@ -168,3 +176,6 @@ class Stream(Iterable):
             return sep.join(self.starmap(str_func))
         else:
             return sep.join(self.map(str_func))
+
+    def pipeline(self, value: T, bind: Callable[[Fn_T2T, T], T]=lambda f, v: f(v)) -> T:
+        return pipeline(self, bind)(value)

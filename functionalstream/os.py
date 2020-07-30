@@ -1,7 +1,6 @@
 import os
-from multiprocessing import Pool
-from typing import Callable, Set, Optional, Iterable
 from pathlib import Path
+from typing import Callable, Set, Iterable
 
 from functionalstream import Stream
 
