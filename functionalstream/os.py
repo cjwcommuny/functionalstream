@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Callable, Set, Iterable
 
-from functionalstream import Stream
+from functionalstream.stream import Stream
 
 LEGAL_VIDEO_FILE_EXTENSIONS: Set[str] = {
     ".mp4", ".3gp", ".ogg", ".wmv", ".webm", ".flv", ".avi", ".mkv"

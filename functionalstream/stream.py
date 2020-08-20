@@ -1,12 +1,10 @@
 import functools
-import functools
 import itertools
 import operator
-from collections import Iterable
+from collections.abc import Iterable, Iterator
 from multiprocessing import Pool
-from typing import Optional, Callable, TypeVar
+from typing import Optional, Callable, TypeVar, Tuple
 
-from functionalstream import pipeline
 
 
 def _star_fn(f):
@@ -17,6 +15,19 @@ def _star_fn(f):
 T = TypeVar('T')
 Fn_T2T = Callable[[T], T]
 
+class RepeatableIterator(Iterator):
+    def __init__(self, iterator):
+        super().__init__()
+        self.iterator = iterator
+
+    def __iter__(self):
+        self.iterator, new_itertor = itertools.tee(self.iterator)
+        return new_itertor
+
+    def __next__(self):
+        return next(self.iterator)
+
+
 
 class Stream(Iterable):
     def __init__(self, iterable: Iterable):
@@ -24,7 +35,8 @@ class Stream(Iterable):
         self.iterable = iterable
 
     def __iter__(self):
-        return iter(self.iterable)
+        self.iterable, new_iterator = itertools.tee(self.iterable)
+        return new_iterator
 
     def accumulate(self, func: Callable=operator.add, initial=None) -> 'Stream':
         return Stream(itertools.accumulate(self, func, initial))
@@ -44,7 +56,12 @@ class Stream(Iterable):
         return Stream(itertools.filterfalse(predicate, self))
 
     def groupby(self, key=None) -> 'Stream':
-        return Stream(itertools.groupby(self, key))
+        return Stream(
+            itertools.starmap(
+                lambda key, values: (key, RepeatableIterator(values)),
+                itertools.groupby(self, key)
+            )
+        )
 
     def slice(self, *args, **kwargs) -> 'Stream':
         return Stream(itertools.islice(self, *args, **kwargs))
@@ -65,9 +82,6 @@ class Stream(Iterable):
     def takewhile(self, predicate: Callable, star: bool=False) -> 'Stream':
         predicate = _star_fn(predicate) if star else predicate
         return Stream(itertools.takewhile(predicate, self))
-
-    def tee(self, n: int=2) -> 'Stream':
-        return Stream(itertools.tee(self, n))
 
     def enumerate(self, start: int=0) -> 'Stream':
         return Stream(enumerate(self, start))
@@ -177,5 +191,22 @@ class Stream(Iterable):
         else:
             return sep.join(self.map(str_func))
 
-    def pipeline(self, value: T, bind: Callable[[Fn_T2T, T], T]=lambda f, v: f(v)) -> T:
-        return pipeline(self, bind)(value)
+    def unpack_tuples(self) -> Tuple[list,...]:
+        """
+        list[tuple] -> tuple[list]
+        """
+        return tuple(list(x) for x in zip(*self.to_list()))
+
+    def peek(self, function: Callable, star: bool=False) -> 'Stream':
+        self.foreach(function, star)
+        return self
+
+    def head(self):
+        return next(iter(self))
+
+    def peek_head(self, function: Callable, star: bool=False) -> 'Stream':
+        if star:
+            function(*self.head())
+        else:
+            function(self.head())
+        return self
