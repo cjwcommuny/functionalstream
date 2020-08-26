@@ -51,24 +51,24 @@ class Stream(Iterable):
         return new_iterator
 
     def accumulate(self, func: Callable=operator.add, initial=None) -> 'Stream':
-        return Stream(itertools.accumulate(self, func, initial))
+        return type(self)(itertools.accumulate(self, func, initial))
 
     def combinations(self, r: int) -> 'Stream':
-        return Stream(itertools.combinations(self, r))
+        return type(self)(itertools.combinations(self, r))
 
     def combinations_with_replacement(self, r: int) -> 'Stream':
-        return Stream(itertools.combinations_with_replacement(self, r))
+        return type(self)(itertools.combinations_with_replacement(self, r))
 
     def dropwhile(self, predicate: Callable, star: Optional[bool]=None) -> 'Stream':
         predicate = get_proper_callable(predicate, star)
-        return Stream(itertools.dropwhile(predicate, self))
+        return type(self)(itertools.dropwhile(predicate, self))
 
     def filterfalse(self, predicate: Callable, star: Optional[bool]=None) -> 'Stream':
         predicate = get_proper_callable(predicate, star)
-        return Stream(itertools.filterfalse(predicate, self))
+        return type(self)(itertools.filterfalse(predicate, self))
 
     def groupby(self, key=None) -> 'Stream':
-        return Stream(
+        return type(self)(
             itertools.starmap(
                 lambda key, values: (key, self.groupby_iterator_type()(values)),
                 itertools.groupby(self, key)
@@ -76,24 +76,24 @@ class Stream(Iterable):
         )
 
     def slice(self, *args, **kwargs) -> 'Stream':
-        return Stream(itertools.islice(self, *args, **kwargs))
+        return type(self)(itertools.islice(self, *args, **kwargs))
 
     def permutations(self, r: int=None) -> 'Stream':
-        return Stream(itertools.permutations(self, r))
+        return type(self)(itertools.permutations(self, r))
 
     def repeat(self, times: int=None) -> 'Stream':
-        return Stream(itertools.repeat(self, times))
+        return type(self)(itertools.repeat(self, times))
 
     def takewhile(self, predicate: Callable, star: Optional[bool]=None) -> 'Stream':
         predicate = get_proper_callable(predicate, star)
-        return Stream(itertools.takewhile(predicate, self))
+        return type(self)(itertools.takewhile(predicate, self))
 
     def enumerate(self, start: int=0) -> 'Stream':
-        return Stream(enumerate(self, start))
+        return type(self)(enumerate(self, start))
 
     def filter(self, function: Callable, star: Optional[bool]=None) -> 'Stream':
         function = get_proper_callable(function, star)
-        return Stream(filter(function, self))
+        return type(self)(filter(function, self))
 
     def map(
             self,
@@ -105,28 +105,28 @@ class Stream(Iterable):
     ) -> 'Stream':
         func = get_proper_callable(func, star)
         if pool is None:
-            return Stream(map(func, self))
+            return type(self)(map(func, self))
         else:
-            return Stream(pool.imap(func, self, *args, **kwargs))
+            return type(self)(pool.imap(func, self, *args, **kwargs))
 
     def reversed(self) -> 'Stream':
-        return Stream(reversed(self.iterable))
+        return type(self)(reversed(self.iterable))
 
     def sorted(self, key=None, reverse: bool=False) -> 'Stream':
-        return Stream(sorted(self, key=key, reverse=reverse))
+        return type(self)(sorted(self, key=key, reverse=reverse))
 
     def sum(self, start: int=0) -> 'Stream':
-        return Stream(sum(self, start))
+        return type(self)(sum(self, start))
 
     def reduce(self, function: Callable, initializer=None, star: Optional[bool]=None) -> 'Stream':
         function = get_proper_callable(function, star)
-        return Stream(functools.reduce(function, self, initializer))
+        return type(self)(functools.reduce(function, self, initializer))
 
     def imap_unordered(
             self, pool: Pool, func: Callable, star: Optional[bool]=None, *args, **kwargs
     ) -> 'Stream':
         func = get_proper_callable(func, star)
-        return Stream(pool.imap_unordered(func, self, *args, **kwargs))
+        return type(self)(pool.imap_unordered(func, self, *args, **kwargs))
 
     def collect(self, function: Callable):
         return function(self)
@@ -191,7 +191,7 @@ class Stream(Iterable):
         return self.islice(stop=n)
 
     def flatten(self) -> 'Stream':
-        return Stream(itertools.chain.from_iterable(self))
+        return type(self)(itertools.chain.from_iterable(self))
 
     def any(self) -> bool:
         return any(self)
