@@ -1,10 +1,5 @@
-import cv2
-from datascience.opencv import VideoCaptureIter
-
 from functionalstream import Stream
 import unittest
-import logging
-import sys
 
 class StreamTestCase(unittest.TestCase):
     def test_normal(self):
