@@ -81,12 +81,6 @@ class Stream(Iterable):
     def repeat(self, times: int=None) -> 'Stream':
         return Stream(itertools.repeat(self, times))
 
-    def starmap(self, func: Callable, pool: Optional[Pool]=None, *args, **kwargs) -> 'Stream':
-        if pool is None:
-            return Stream(itertools.starmap(func, self))
-        else:
-            return Stream(pool.starmap(func, self, *args, **kwargs))
-
     def takewhile(self, predicate: Callable, star: Optional[bool]=None) -> 'Stream':
         predicate = get_proper_callable(predicate, star)
         return Stream(itertools.takewhile(predicate, self))
@@ -98,11 +92,19 @@ class Stream(Iterable):
         function = get_proper_callable(function, star)
         return Stream(filter(function, self))
 
-    def map(self, func: Callable, pool: Optional[Pool]=None, *args, **kwargs) -> 'Stream':
+    def map(
+            self,
+            func: Callable,
+            pool: Optional[Pool]=None,
+            star: Optional[bool]=None,
+            *args,
+            **kwargs
+    ) -> 'Stream':
+        func = get_proper_callable(func, star)
         if pool is None:
             return Stream(map(func, self))
         else:
-            return Stream(pool.map(func, self, *args, **kwargs))
+            return Stream(pool.imap(func, self, *args, **kwargs))
 
     def reversed(self) -> 'Stream':
         return Stream(reversed(self.iterable))
@@ -116,10 +118,6 @@ class Stream(Iterable):
     def reduce(self, function: Callable, initializer=None, star: Optional[bool]=None) -> 'Stream':
         function = get_proper_callable(function, star)
         return Stream(functools.reduce(function, self, initializer))
-
-    def imap(self, pool: Pool, func: Callable, star: Optional[bool]=None, *args, **kwargs) -> 'Stream':
-        func = get_proper_callable(func, star)
-        return Stream(pool.imap(func, self, *args, **kwargs))
 
     def imap_unordered(
             self, pool: Pool, func: Callable, star: Optional[bool]=None, *args, **kwargs
@@ -219,9 +217,6 @@ class Stream(Iterable):
         list[tuple] -> tuple[list]
         """
         return tuple(list(x) for x in zip(*self.to_list()))
-
-    def peek(self, function: Callable, star: Optional[bool]=None) -> 'Stream':
-        return self.foreach(function, star)
 
     def head(self):
         return next(iter(self))
