@@ -1,12 +1,14 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 from functools import partial, reduce
 from typing import Callable, Optional, Union, List
 
-from functionalstream import Stream
 
 increment = lambda x: x + 1
 always_true = lambda x: True
 always_false = lambda x: False
+identical = lambda x: x
+none = lambda x: None
+
 
 class Fn(Callable):
     def __init__(self, function: Callable):
