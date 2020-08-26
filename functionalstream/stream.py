@@ -43,6 +43,9 @@ class Stream(Iterable):
         super().__init__()
         self.iterable = iterable
 
+    def groupby_iterator_type(self):
+        return RepeatableIterator
+
     def __iter__(self):
         self.iterable, new_iterator = itertools.tee(self.iterable)
         return new_iterator
@@ -67,7 +70,7 @@ class Stream(Iterable):
     def groupby(self, key=None) -> 'Stream':
         return Stream(
             itertools.starmap(
-                lambda key, values: (key, RepeatableIterator(values)),
+                lambda key, values: (key, self.groupby_iterator_type()(values)),
                 itertools.groupby(self, key)
             )
         )
@@ -225,3 +228,11 @@ class Stream(Iterable):
         function = get_proper_callable(function, star)
         function(self.head())
         return self
+
+
+class OneOffStream(Stream):
+    def __iter__(self):
+        return iter(self.iterable)
+
+    def groupby_iterator_type(self):
+        return iter
