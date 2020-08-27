@@ -161,6 +161,10 @@ class Stream(Iterable):
         import torch
         return torch.cat(self.to_list())
 
+    def stack_to_tensor(self) -> 'torch.Tensor':
+        import torch
+        return torch.stack(self.to_list())
+
     def consume(self):
         for _ in self:
             pass
